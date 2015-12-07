@@ -1,6 +1,6 @@
 #Author: Brecht Vandevoort
 
-EXEC = synacor
+NAME = synacor
 BIN = bin/
 SRC = src/
 
@@ -9,17 +9,23 @@ FLAGS = -Wall -pedantic
 CFLAGS = -c $(FLAGS)
 LFLAGS = $(FLAGS)
 
+EXEC = $(BIN)$(NAME)
 CFILES = $(shell find $(SRC) -name *.c)
 HEADERS = $(shell find $(SRC) -name *.h)
 OBJS = $(CFILES:$(SRC)%.c=$(BIN)%.o)
 
-all: $(EXEC)
+all: run
+
+run: $(EXEC)
+	./$(EXEC)
+	
+compile: $(EXEC)
 
 $(EXEC): $(OBJS) $(HEADERS)
-	$(CC) $(LFLAGS) $(OBJS) -o $(BIN)$(EXEC)
+	$(CC) $(LFLAGS) $(OBJS) -o $(EXEC)
 
 $(BIN)%.o: $(SRC)%.c $(HEADERS)
 	$(CC) $(CFLAGS) -o $@ $<
 
 clean:
-	rm -f $(BIN)*.o $(BIN)$(EXEC)
+	rm -f $(BIN)*.o $(EXEC)
