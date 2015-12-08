@@ -6,6 +6,7 @@
  */
 #include "virtualmachine.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 void initVirtualMachine(VirtualMachine *vm)
@@ -22,4 +23,39 @@ void destroyVirtualMachine(VirtualMachine *vm)
 uint16_t nextMemoryElement(VirtualMachine *vm)
 {
 	return vm->memory[vm->instructionPointer++];
+}
+
+int executeStep(VirtualMachine *vm)
+{
+	uint16_t opcode = nextMemoryElement(vm);
+
+	switch(opcode)
+	{
+		case OP_HALT:
+			return VM_STATE_HALTED;
+			break;
+		case OP_OUT:
+			fprintf(stdout, "%c", nextMemoryElement(vm));
+			return VM_STATE_RUNNING;
+			break;
+		case OP_NOOP:
+			return VM_STATE_RUNNING;
+			break;
+		default:
+			fprintf(stderr, "Unrecognized opcode: %d\n", opcode);
+			return VM_STATE_ERROR;
+			break;
+	}
+}
+
+int runVirtualMachine(VirtualMachine *vm)
+{
+	int  state;
+
+	do
+	{
+		state = executeStep(vm);
+	} while(state == VM_STATE_RUNNING);
+
+	return state;
 }

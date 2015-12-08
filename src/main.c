@@ -11,7 +11,7 @@
 
 int main(int argc, char *argv[]) {
 	VirtualMachine vm;
-	int i;
+	int state;
 	
 	if(argc != 2)
 	{
@@ -25,8 +25,9 @@ int main(int argc, char *argv[]) {
 	
 	loadMemory(argv[1], &vm);
 	
-	for (i = 0; i < 10; ++i)
-		fprintf(stdout, "The next instruction is: %d\n", nextMemoryElement(&vm));
+	state = runVirtualMachine(&vm);
+
+	fprintf(stderr, "VM ended with state %d\n", state);
 
 	destroyVirtualMachine(&vm);
 
