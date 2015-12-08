@@ -1,5 +1,8 @@
-#bin folder
+#bin and doc folder
 /bin/*
+/doc/doxygen*
+/doc/latex/*
+/doc/html/*
 
 # Object files
 *.o
