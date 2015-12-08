@@ -17,7 +17,7 @@ OBJS = $(CFILES:$(SRC)%.c=$(BIN)%.o)
 all: run
 
 run: $(EXEC)
-	./$(EXEC)
+	./$(EXEC) ./info/challenge.bin
 	
 compile: $(EXEC)
 

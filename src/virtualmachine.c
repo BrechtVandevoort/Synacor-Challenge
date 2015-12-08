@@ -10,11 +10,16 @@
 
 void initVirtualMachine(VirtualMachine *vm)
 {
-	vm->memory = (uint16_t *) malloc(MEM_BYTE_SIZE);
+	vm->memory = (uint16_t *) malloc(VM_MEM_SIZE);
 	vm->instructionPointer = 0;
 }
 
 void destroyVirtualMachine(VirtualMachine *vm)
 {
 	free(vm->memory);
+}
+
+uint16_t nextMemoryElement(VirtualMachine *vm)
+{
+	return vm->memory[vm->instructionPointer++];
 }

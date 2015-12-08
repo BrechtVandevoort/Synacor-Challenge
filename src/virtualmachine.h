@@ -9,8 +9,9 @@
 
 #include <stdint.h>
 
-#define MEM_SIZE 32768
-#define MEM_BYTE_SIZE (MEM_SIZE * 2)
+#define VM_MEM_ELEM_COUNT 32768
+#define VM_MEM_ELEM_SIZE 2
+#define VM_MEM_SIZE (VM_MEM_ELEM_COUNT * VM_MEM_ELEM_SIZE)
 
 /**
  * @brief Represents a virtual machine
@@ -32,5 +33,11 @@ void initVirtualMachine(VirtualMachine *vm);
  * @param vm The virtual machine to destroy.
  */
 void destroyVirtualMachine(VirtualMachine *vm);
+
+/**
+ * @brief Returns the next element from memory, based on the instructionPointer.
+ * @return The next element from memory.
+ */
+uint16_t nextMemoryElement(VirtualMachine *vm);
 
 #endif
