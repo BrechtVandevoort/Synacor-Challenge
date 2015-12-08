@@ -6,8 +6,9 @@ SRC = src/
 
 CC = gcc
 FLAGS = -Wall -pedantic
-CFLAGS = -c $(FLAGS)
-LFLAGS = $(FLAGS)
+COMMANDFLAGS = 
+CFLAGS = -c $(FLAGS) $(COMMANDFLAGS)
+LFLAGS = $(FLAGS) $(COMMANDFLAGS)
 
 EXEC = $(BIN)$(NAME)
 CFILES = $(shell find $(SRC) -name *.c)

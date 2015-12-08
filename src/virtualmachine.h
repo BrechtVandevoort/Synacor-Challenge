@@ -10,10 +10,17 @@
 #include <stdint.h>
 
 #include "opcodes.h"
+#include "stack.h"
 
 #define VM_MEM_ELEM_COUNT 32768
 #define VM_MEM_ELEM_SIZE 2
 #define VM_MEM_SIZE (VM_MEM_ELEM_COUNT * VM_MEM_ELEM_SIZE)
+
+#define VM_REGISTER_COUNT 8
+#define VM_REGISTER_MASK 0x8000
+#define VM_REGISTER_ADDRESS_MASK 0x7fff
+
+#define VM_VALID_VALUE_MASK 0x7fff
 
 #define VM_STATE_RUNNING 0
 #define VM_STATE_HALTED 1
@@ -24,7 +31,9 @@
  */
 typedef struct
 {
-	uint16_t *memory;
+	uint16_t memory[VM_MEM_ELEM_COUNT];
+	uint16_t registers[VM_REGISTER_COUNT];
+	Stack *stack;
 	int instructionPointer;
 } VirtualMachine;
 
@@ -59,5 +68,26 @@ int executeStep(VirtualMachine *vm);
  * @return The state of the virtual machine after executing.
  */
 int runVirtualMachine(VirtualMachine *vm);
+
+/**
+ * @brief Translates the given memory element into a value.
+ * If the memory element is the address of a register,
+ * the value of this register is returned.
+ * If not, the value itself is returned.
+ * @param memElem The memory element to translate to a value.
+ * @return The translated value.
+ */
+uint16_t getValue(uint16_t memElem, VirtualMachine *vm);
+
+
+/**
+ * @brief Stores a value in a register.
+ * @param value The value to store.
+ * @param registerAddress Address of the register.
+ * @param vm The virtual machine.
+ * @return 0 on success, -1 if the register is invalid.
+ */
+int storeValue(uint16_t value, uint16_t registerAddress, VirtualMachine *vm);
+
 
 #endif
