@@ -10,9 +10,36 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define REGISTER_INDEX(r) (VM_REGISTER_ADDRESS_MASK & r)
-#define IS_VALID_REGISTER(r) ((VM_REGISTER_MASK & r) && REGISTER_INDEX(r) < VM_REGISTER_COUNT)
-#define MAKE_VALID_VALUE(v) (v & VM_VALID_VALUE_MASK)
+/**
+ * @brief Macro for converting a register address to a 0-based index number.
+ */ 
+#define REGISTER_INDEX(r) (VM_REGISTER_ADDRESS_MASK & (r))
+
+/**
+ * @brief Macro for checking if the given register address r is valid.
+ */
+#define IS_VALID_REGISTER(r) ((VM_REGISTER_MASK & (r)) && REGISTER_INDEX(r) < VM_REGISTER_COUNT)
+
+/**
+ * @brief Macro for converting a given value v into a valid value. 
+ * result = v % 32768.
+ */
+#define MAKE_VALID_VALUE(v) ((v) & VM_VALID_VALUE_MASK)
+
+/**
+ * @brief Macro used in function executeStep().
+ *  It stores the given value into a register based on the first param.
+ * This macro will check for a possible failure and write an error message.
+ */
+#define SAFE_STORE_MACRO(value) \
+	do { \
+		if(storeValue(value, params[0], vm)) \
+		{ \
+			fprintf(stderr, "Invalid register address: %d\n", params[0]); \
+			state = VM_STATE_ERROR; \
+		} \
+	} while(0)
+
 
 void initVirtualMachine(char *inputstreamFile, VirtualMachine *vm)
 {
@@ -40,12 +67,14 @@ uint16_t nextMemoryElement(VirtualMachine *vm)
 int executeStep(VirtualMachine *vm)
 {
 	uint16_t opcode;
-	uint16_t paramA, paramB, paramC;
+	uint16_t params[OPCODE_MAX_PARAMS];
 	uint16_t value1, value2, value3;
   	uint32_t val32;
 	int state = VM_STATE_RUNNING;
 	
 	opcode = nextMemoryElement(vm);
+
+	loadParams(params, opcode, vm);
 
 #ifdef DEBUG
 	fprintf(stderr, "Executing opcode: %5d on address: %5d\n", opcode,vm->instructionPointer-1);
@@ -57,157 +86,91 @@ int executeStep(VirtualMachine *vm)
 			state = VM_STATE_HALTED;
 			break;
 		case OP_SET:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			if(storeValue(value1, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			value1 = getValue(params[1], vm);
+			SAFE_STORE_MACRO(value1);
 			break;
 		case OP_PUSH:
-			paramA = nextMemoryElement(vm);
-			value1 = getValue(paramA, vm);
+			value1 = getValue(params[0], vm);
 			pushStack(value1, vm->stack);
 			break;
 		case OP_POP:
-			paramA = nextMemoryElement(vm);
 			if(popStack(&value1, vm->stack))
 			{
 				fprintf(stderr, "Could not pop from empty stack\n");
 				state = VM_STATE_ERROR;
 			}
 			else
-			{
-				if(storeValue(value1, paramA, vm))
-				{
-					fprintf(stderr, "Invalid register address: %d\n", paramA);
-					state = VM_STATE_ERROR;
-				}
-			}
+				SAFE_STORE_MACRO(value1);
 			break;
 		case OP_EQ:
 		case OP_GT:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			paramC = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			value2 = getValue(paramC, vm);
+			value1 = getValue(params[1], vm);
+			value2 = getValue(params[2], vm);
 			if((value1 == value2 && opcode == OP_EQ)
 					|| (value1 > value2 && opcode == OP_GT))
 				value3 = 1;
 			else
 				value3 = 0;
-			if(storeValue(value3, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value3);
 			break;
 		case OP_JMP:
-			paramA = nextMemoryElement(vm);
-			vm->instructionPointer = getValue(paramA, vm);
+			vm->instructionPointer = getValue(params[0], vm);
 			break;
 		case OP_JT:
+			value1 = getValue(params[0], vm);
+			if(value1 != 0)
+				vm->instructionPointer = getValue(params[1], vm);
+			break;
 		case OP_JF:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			value1 = getValue(paramA, vm);
-			if ((value1 != 0 && opcode == OP_JT) 
-					|| (value1 == 0 && opcode == OP_JF))
-			{
-				vm->instructionPointer = getValue(paramB, vm);
-			}
+			value1 = getValue(params[0], vm);
+			if(value1 == 0)
+				vm->instructionPointer = getValue(params[1], vm);
 			break;
 		case OP_ADD:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			paramC = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			value1 += getValue(paramC, vm);
+			value1 = getValue(params[1], vm);
+			value1 += getValue(params[2], vm);
 			value1 = MAKE_VALID_VALUE(value1);
-			if(storeValue(value1, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value1);
 			break;
 		case OP_MULT:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			paramC = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			value2 = getValue(paramC, vm);
+			value1 = getValue(params[1], vm);
+			value2 = getValue(params[2], vm);
 			val32 = (uint32_t)value1 * (uint32_t)value2;
 			val32 = MAKE_VALID_VALUE(val32);
 			value3 = (uint16_t)val32;
-			if(storeValue(value3, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value3);
 			break;
 		case OP_MOD:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			paramC = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			value2 = getValue(paramC, vm);
+			value1 = getValue(params[1], vm);
+			value2 = getValue(params[2], vm);
 			value3 = value1 % value2;
-			if(storeValue(value3, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value3);
 			break;
 		case OP_AND:
 		case OP_OR:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			paramC = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
-			value2 = getValue(paramC, vm);
+			value1 = getValue(params[1], vm);
+			value2 = getValue(params[2], vm);
 			value3 = (opcode == OP_AND)? value1 & value2 : value1 | value2;
-			if(storeValue(value3, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value3);
 			break;
 		case OP_NOT:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			value1 = ~getValue(paramB, vm);
+			value1 = ~getValue(params[1], vm);
 			value1 = MAKE_VALID_VALUE(value1);
-			if(storeValue(value1, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value1);
 			break;
 		case OP_RMEM:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			value1 = getValue(paramB, vm);
+			value1 = getValue(params[1], vm);
 			value2 = vm->memory[value1];
-			if(storeValue(value2, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value2);
 			break;
 		case OP_WMEM:
-			paramA = nextMemoryElement(vm);
-			paramB = nextMemoryElement(vm);
-			value1 = getValue(paramA, vm);
-			value2 = getValue(paramB, vm);
+			value1 = getValue(params[0], vm);
+			value2 = getValue(params[1], vm);
 			vm->memory[value1] = value2;
 			break;
 		case OP_CALL:
-			paramA = nextMemoryElement(vm);
 			pushStack(vm->instructionPointer, vm->stack);
-			vm->instructionPointer = getValue(paramA, vm);
+			vm->instructionPointer = getValue(params[0], vm);
 			break;
 		case OP_RET:
 			if(popStack(&value1, vm->stack))
@@ -216,23 +179,14 @@ int executeStep(VirtualMachine *vm)
 				state = VM_STATE_HALTED;
 			}
 			else
-			{
 				vm->instructionPointer = value1;
-			}
 			break;
 		case OP_OUT:
-			paramA = nextMemoryElement(vm);
-			fprintf(stdout, "%c", getValue(paramA, vm));
+			fprintf(stdout, "%c", getValue(params[0], vm));
 			break;
 		case OP_IN:
-			paramA = nextMemoryElement(vm);
-			/* fprintf(stderr, "Some info: op: %3d addr: %5d mem: %5d %5d %5d\n", vm->memory[vm->instructionPointer], vm->instructionPointer, vm->memory[vm->instructionPointer+1], vm->memory[vm->instructionPointer+2], vm->memory[vm->instructionPointer+3]); */
 			value1 = inputsreamGetChar(vm->inputstream);
-			if(storeValue(value1, paramA, vm))
-			{
-				fprintf(stderr, "Invalid register address: %d\n", paramA);
-				state = VM_STATE_ERROR;
-			}
+			SAFE_STORE_MACRO(value1);
 			break;
 		case OP_NOOP:
 			break;
@@ -280,5 +234,14 @@ int storeValue(uint16_t value, uint16_t registerAddress, VirtualMachine *vm)
 	return 0;
 }
 
+void loadParams(uint16_t *params, uint16_t opcode, VirtualMachine *vm)
+{
+	int i;
+	int numParams = opcodeParamCount[opcode];
 
+	for(i = 0; i < numParams; ++i)
+	{
+		params[i] = nextMemoryElement(vm);
+	}
+}
 

@@ -92,5 +92,12 @@ uint16_t getValue(uint16_t memElem, VirtualMachine *vm);
  */
 int storeValue(uint16_t value, uint16_t registerAddress, VirtualMachine *vm);
 
+/**
+ * @brief Loads params based on the opcode
+ * @param params Array to load the params into
+ * @param opcode The opcode to load params for
+ * @param vm The virtual machine
+ */
+void loadParams(uint16_t *params, uint16_t opcode, VirtualMachine *vm);
 
 #endif

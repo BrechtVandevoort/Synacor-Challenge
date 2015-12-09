@@ -30,5 +30,15 @@
 #define OP_OUT 19
 #define OP_IN 20
 #define OP_NOOP 21
+#define OPCODE_NUM_OPS 22
+
+#define OPCODE_MAX_PARAMS 3
+
+/**
+ * @brief Lookup table for the number of params for each opcode
+ */
+extern int opcodeParamCount[];
+
+
 
 #endif
