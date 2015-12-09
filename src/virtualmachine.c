@@ -236,12 +236,16 @@ int storeValue(uint16_t value, uint16_t registerAddress, VirtualMachine *vm)
 
 void loadParams(uint16_t *params, uint16_t opcode, VirtualMachine *vm)
 {
-	int i;
-	int numParams = opcodeParamCount[opcode];
-
-	for(i = 0; i < numParams; ++i)
+	int i, numParams;
+   
+	if(opcode >= OPCODE_NUM_OPS)
 	{
-		params[i] = nextMemoryElement(vm);
+		fprintf(stderr, "Could not read params: invalid opcode: %d\n", opcode);
+		return;
 	}
+
+	numParams = opcodeParamCount[opcode];
+	for(i = 0; i < numParams; ++i)
+		params[i] = nextMemoryElement(vm);
 }
 
