@@ -1,5 +1,6 @@
-#bin, out and doc folder
+#bin, input, out and doc folder
 /bin/*
+/input/*
 /out/*
 /doc/doxygen*
 /doc/latex/*

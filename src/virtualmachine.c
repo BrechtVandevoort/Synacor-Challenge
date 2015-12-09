@@ -14,13 +14,15 @@
 #define IS_VALID_REGISTER(r) ((VM_REGISTER_MASK & r) && REGISTER_INDEX(r) < VM_REGISTER_COUNT)
 #define MAKE_VALID_VALUE(v) (v & VM_VALID_VALUE_MASK)
 
-void initVirtualMachine(VirtualMachine *vm)
+void initVirtualMachine(char *inputstreamFile, VirtualMachine *vm)
 {
 	vm->instructionPointer = 0;
 	memset(vm->memory, 0, VM_MEM_SIZE);
 	memset(vm->registers, 0, VM_REGISTER_COUNT * sizeof(uint16_t));
 	vm->stack = (Stack*) malloc(sizeof(Stack));
 	initStack(vm->stack);
+	vm->inputstream = (Inputstream*) malloc(sizeof(Inputstream));
+	initBuffer(inputstreamFile, vm->inputstream);
 }
 
 void destroyVirtualMachine(VirtualMachine *vm)
@@ -224,10 +226,8 @@ int executeStep(VirtualMachine *vm)
 			break;
 		case OP_IN:
 			paramA = nextMemoryElement(vm);
-			/* TODO */
-			fprintf(stderr, "OP_IN not implemented!\n");
-			state = VM_STATE_ERROR;
-			value1 = 0;
+			/* fprintf(stderr, "Some info: op: %3d addr: %5d mem: %5d %5d %5d\n", vm->memory[vm->instructionPointer], vm->instructionPointer, vm->memory[vm->instructionPointer+1], vm->memory[vm->instructionPointer+2], vm->memory[vm->instructionPointer+3]); */
+			value1 = inputsreamGetChar(vm->inputstream);
 			if(storeValue(value1, paramA, vm))
 			{
 				fprintf(stderr, "Invalid register address: %d\n", paramA);

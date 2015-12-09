@@ -15,7 +15,7 @@ CFILES = $(shell find $(SRC) -name *.c)
 HEADERS = $(shell find $(SRC) -name *.h)
 OBJS = $(CFILES:$(SRC)%.c=$(BIN)%.o)
 
-all: run
+all: compile
 
 run: $(EXEC)
 	./$(EXEC) ./info/challenge.bin

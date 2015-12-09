@@ -12,16 +12,22 @@
 int main(int argc, char *argv[]) {
 	VirtualMachine vm;
 	int state;
-	
-	if(argc != 2)
+	char *inputstreamFile = NULL;
+
+	if(argc < 2)
 	{
-		fprintf(stderr, "No filename given.\n");
+		fprintf(stderr, "Usage: ./synacor filename.bin [stdinputfile]\n");
 		return 1;
+	}
+
+	if(argc >= 3)
+	{
+		inputstreamFile = argv[2];
 	}
 
 	fprintf(stderr, "running...\n");
 	
-	initVirtualMachine(&vm);
+	initVirtualMachine(inputstreamFile, &vm);
 	
 	loadMemory(argv[1], &vm);
 	
