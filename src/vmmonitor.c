@@ -101,10 +101,21 @@ int monitorVirtualMachine(VirtualMachine *vm)
 
 	do
 	{
-		SET_CURSOR_POS(stdout,0,0);
-		vmmonitorWriteVMInfo(stdout, vm);
-		vmmonitorWriteVMOutputstream(stdout, vm);
-		state = executeStep(vm);
+		do
+		{
+			SET_CURSOR_POS(stdout,0,0);
+			vmmonitorWriteVMInfo(stdout, vm);
+			SET_CURSOR_POS(stdout,0,VMMONITOR_VM_STATE_LINES);
+			vmmonitorWriteVMOutputstream(stdout, vm);
+			state = executeStep(vm);
+		} while(state == VM_STATE_RUNNING);
+		
+		/* refill inputstream buffer */
+		if(state == VM_STATE_WAITING_FOR_INPUT)
+		{
+			inputstreamWriteChar(getchar(), vm->inputstream);
+			state = VM_STATE_RUNNING;
+		}
 	} while(state == VM_STATE_RUNNING);
 
 	return state;

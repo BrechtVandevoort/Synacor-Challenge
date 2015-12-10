@@ -8,6 +8,7 @@
 #define INPUTSTREAM_H
 
 #include <stdio.h>
+#include <stdint.h>
 
 #define INPUTSTREAM_BUFFER_SIZE 4096
 
@@ -28,8 +29,15 @@ void initInputstream(char *filename, Inputstream *inputstream);
 /**
  * @brief Reads a character from the given inputstream.
  * @param inputstream The inputstream.
- * @return The character.
+ * @return The character, or 0 of the inputstream is empty.
  */
-int inputsreamGetChar(Inputstream *inputstream);
+uint16_t inputsreamGetChar(Inputstream *inputstream);
+
+/**
+ * Writes a character into the stream for reading by the vm.
+ * @param c The character to write
+ * @param inputstream The inputstream.
+ */
+void inputstreamWriteChar(char c, Inputstream *inputstream);
 
 #endif

@@ -24,15 +24,32 @@ void initInputstream(char *filename, Inputstream *inputstream)
 	fclose(f);
 }
 
-int inputsreamGetChar(Inputstream *inputstream)
+uint16_t inputsreamGetChar(Inputstream *inputstream)
 {
 	int result;
 
-	while(inputstream->pos < inputstream->size) {
+	if(inputstream->size > 0) {
 		result = inputstream->buffer[inputstream->pos++];
-		/* if(result != '\n') */
-			return result;
+		inputstream->pos %= INPUTSTREAM_BUFFER_SIZE;
+		inputstream->size--;
+		return result;
 	}
 	
-	return getchar();
+	return 0;
 }
+
+void inputstreamWriteChar(char c, Inputstream *inputstream)
+{
+	int writePos;
+
+	if(inputstream->size == INPUTSTREAM_BUFFER_SIZE)
+	{
+		fprintf(stderr, "Buffer overflow in inputstream.\n");
+		return;
+	}
+
+	writePos = (inputstream->pos + inputstream->size) % INPUTSTREAM_BUFFER_SIZE;
+	inputstream->buffer[writePos] = c;
+	inputstream->size++;
+}
+

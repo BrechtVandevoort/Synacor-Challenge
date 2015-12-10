@@ -25,8 +25,9 @@
 #define VM_VALID_VALUE_MASK 0x7fff
 
 #define VM_STATE_RUNNING 0
-#define VM_STATE_HALTED 1
-#define VM_STATE_ERROR 2
+#define VM_STATE_WAITING_FOR_INPUT 1
+#define VM_STATE_HALTED 2
+#define VM_STATE_ERROR 3
 
 /**
  * @brief Macro for checking if the given register address r is valid.

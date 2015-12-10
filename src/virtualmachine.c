@@ -177,11 +177,20 @@ int executeStep(VirtualMachine *vm)
 			break;
 		case OP_OUT:
 			outputstreamWriteChar(getValue(params[0], vm), vm->outputstream);
-			/* fprintf(stdout, "%c", getValue(params[0], vm)); */
 			break;
 		case OP_IN:
 			value1 = inputsreamGetChar(vm->inputstream);
-			SAFE_STORE_MACRO(value1);
+			if(value1 == 0)
+			{
+				state = VM_STATE_WAITING_FOR_INPUT;
+				/* Restore current state to rerun current opcode */
+				vm->instructionCount--;
+				vm->instructionPointer -= 2; /* opcode and 1 param*/
+			}
+			else
+			{
+				SAFE_STORE_MACRO(value1);
+			}
 			break;
 		case OP_NOOP:
 			break;
@@ -203,7 +212,17 @@ int runVirtualMachine(VirtualMachine *vm)
 
 	do
 	{
-		state = executeStep(vm);
+		do
+		{
+			state = executeStep(vm);
+		} while(state == VM_STATE_RUNNING);
+		
+		/* refill inputstream buffer */
+		if(state == VM_STATE_WAITING_FOR_INPUT)
+		{
+			inputstreamWriteChar(getchar(), vm->inputstream);
+			state = VM_STATE_RUNNING;
+		}
 	} while(state == VM_STATE_RUNNING);
 
 	return state;

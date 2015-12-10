@@ -12,6 +12,9 @@
 
 #include "virtualmachine.h"
 
+#define VMMONITOR_VM_STATE_LINES 22
+#define VMMONITOR_VM_OUTPUT_LINES 10
+
 /**
  * @brief Writes the state of the virtual machine to a given stream.
  * @param stream The stream to write to.
