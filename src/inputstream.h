@@ -23,7 +23,7 @@ typedef struct
  * @param filename optional filename to load into the buffer. NULL if starting empty.
  * @param inputstream The inputstream.
  */
-void initBuffer(char *filename, Inputstream *inputstream);
+void initInputstream(char *filename, Inputstream *inputstream);
 
 /**
  * @brief Reads a character from the given inputstream.

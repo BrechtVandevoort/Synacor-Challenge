@@ -6,7 +6,7 @@
  */
 #include "inputstream.h"
 
-void initBuffer(char *filename, Inputstream *inputstream)
+void initInputstream(char *filename, Inputstream *inputstream)
 {
 	FILE *f;
 

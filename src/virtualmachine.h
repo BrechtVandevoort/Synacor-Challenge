@@ -12,6 +12,7 @@
 #include "opcodes.h"
 #include "stack.h"
 #include "inputstream.h"
+#include "outputstream.h"
 
 #define VM_MEM_ELEM_COUNT 32768
 #define VM_MEM_ELEM_SIZE 2
@@ -46,7 +47,9 @@ typedef struct
 	uint16_t registers[VM_REGISTER_COUNT];
 	Stack *stack;
 	uint16_t instructionPointer;
+	int instructionCount;
 	Inputstream *inputstream;
+	Outputstream *outputstream;
 } VirtualMachine;
 
 /**
@@ -54,7 +57,7 @@ typedef struct
  * @param inputstreamFile Name of the inputstream file, or NULL if not used
  * @param vm The virtual machine to initialize.
  */
-void initVirtualMachine(char *inputstreamFile, VirtualMachine *vm);
+void initVirtualMachine(char *inputstreamFile, FILE *ostream,  VirtualMachine *vm);
 
 /**
  * @brief Destroys a given virtual machine.

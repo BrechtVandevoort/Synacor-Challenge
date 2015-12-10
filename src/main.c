@@ -13,8 +13,7 @@
 
 int main(int argc, char *argv[]) {
 	VirtualMachine vm;
-	int state;
-	int breakpoint = -1;
+	int state, monitorMode = 0;
 	char *inputstreamFile = NULL;
 
 	if(argc < 2)
@@ -30,17 +29,23 @@ int main(int argc, char *argv[]) {
 
 	if(argc >= 4)
 	{
-		breakpoint = atoi(argv[3]);
+		monitorMode = 1;
 	}
 
 	fprintf(stderr, "running...\n");
 	
-	initVirtualMachine(inputstreamFile, &vm);
-	
-	loadMemory(argv[1], &vm);
-	
-	/* state = runVirtualMachine(&vm); */
-	state = monitorVirtualMachine(breakpoint, &vm);
+	if(monitorMode)
+	{
+		initVirtualMachine(inputstreamFile, NULL, &vm);
+		loadMemory(argv[1], &vm);
+		state = monitorVirtualMachine(&vm);
+	}
+	else
+	{
+		initVirtualMachine(inputstreamFile, stdout, &vm);
+		loadMemory(argv[1], &vm);
+		state = runVirtualMachine(&vm);
+	}
 
 	fprintf(stderr, "VM ended with state %d\n", state);
 

@@ -31,15 +31,18 @@
 	} while(0)
 
 
-void initVirtualMachine(char *inputstreamFile, VirtualMachine *vm)
+void initVirtualMachine(char *inputstreamFile, FILE *ostream,  VirtualMachine *vm)
 {
 	vm->instructionPointer = 0;
+	vm->instructionCount = 0;
 	memset(vm->memory, 0, VM_MEM_SIZE);
 	memset(vm->registers, 0, VM_REGISTER_COUNT * sizeof(uint16_t));
 	vm->stack = (Stack*) malloc(sizeof(Stack));
 	initStack(vm->stack);
 	vm->inputstream = (Inputstream*) malloc(sizeof(Inputstream));
-	initBuffer(inputstreamFile, vm->inputstream);
+	initInputstream(inputstreamFile, vm->inputstream);
+	vm->outputstream = (Outputstream*) malloc(sizeof(Outputstream));
+	initOutputstream(ostream, vm->outputstream);
 }
 
 void destroyVirtualMachine(VirtualMachine *vm)
@@ -62,8 +65,9 @@ int executeStep(VirtualMachine *vm)
   	uint32_t val32;
 	int state = VM_STATE_RUNNING;
 	
-	opcode = nextMemoryElement(vm);
+	vm->instructionCount++;
 
+	opcode = nextMemoryElement(vm);
 	loadParams(params, opcode, vm);
 
 #ifdef DEBUG
@@ -172,7 +176,8 @@ int executeStep(VirtualMachine *vm)
 				vm->instructionPointer = value1;
 			break;
 		case OP_OUT:
-			fprintf(stdout, "%c", getValue(params[0], vm));
+			outputstreamWriteChar(getValue(params[0], vm), vm->outputstream);
+			/* fprintf(stdout, "%c", getValue(params[0], vm)); */
 			break;
 		case OP_IN:
 			value1 = inputsreamGetChar(vm->inputstream);

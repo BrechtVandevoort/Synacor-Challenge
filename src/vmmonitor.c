@@ -8,27 +8,52 @@
 
 #include "memmanager.h"
 
+#define SET_CURSOR_POS(stream,x,y) fprintf(stream, "\033[%d;%dH", (y)+1, (x)+1)
+
 void vmmonitorWriteVMInfo(FILE *stream, VirtualMachine *vm)
 {
 	int i;
 
-	/* Print current position */
-	fprintf(stream, "POSITION: %d\n", vm->instructionPointer);
+	/* Print counter and current position */
+	fprintf(stream, "OPCODE COUNTER: %7d    POSITION: %d\n\n", vm->instructionCount, vm->instructionPointer);
 
 	/* Print register values */
-#ifdef MONITOR_VERBOSE
-	fprintf(stream, "REGISTERS:\n");
-#endif
+	fprintf(stream, "REGISTERS: ");
 	for(i = 0; i < VM_REGISTER_COUNT; ++i)
-		fprintf(stream, "R%d: %5d ", i, vm->registers[i]);
-	fprintf(stream, "\n");
+	fprintf(stream, "<R%d: %5d> ", i, vm->registers[i]);
+	fprintf(stream, "\n\n");
 
-#ifdef MONITOR_VERBOSE
 	/* Print memory near the current position of the instruction pointer */
 	fprintf(stream, "NEAR MEMORY INFO:\n");
-	for(i = vm->instructionPointer-10; i < vm->instructionPointer + 20; ++i)
+	for(i = vm->instructionPointer-5; i < vm->instructionPointer + 10; ++i)
 		vmmonitorWriteMemoryLine(stream, i, vm);
-#endif
+
+	/* Print horizontal line */
+	fprintf(stream, "                                        \n--------------------------------------\n");
+}
+
+void vmmonitorWriteVMOutputstream(FILE *stream, VirtualMachine *vm)
+{
+	int pos;
+	int count = 0;
+
+	pos = vm->outputstream->bufferSize - 1;
+	while(pos >= 0 && count < 15) {
+		if(vm->outputstream->buffer[pos] == '\n')
+			count++;
+		pos--;
+	}
+	pos++;
+	while(pos < vm->outputstream->bufferSize) {
+		if(vm->outputstream->buffer[pos] == '\n')
+			fprintf(stream, "                                                                             ");
+		fprintf(stream, "%c", vm->outputstream->buffer[pos]);
+		pos++;
+	}
+
+	fprintf(stream, "                                                               \n");
+	fprintf(stream, "                                                               \n");
+	fprintf(stream, "                                                               \n");
 }
 
 void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm)
@@ -52,7 +77,7 @@ void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm
 
 	/*write opcode if valid*/
 	if(value < OPCODE_NUM_OPS)
-		fprintf(stream, "%6s ", opcodeGetName(value));
+		fprintf(stream, "%4s ", opcodeGetName(value));
 	else
 		fprintf(stream, "       ");
 
@@ -64,31 +89,21 @@ void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm
 
 	/* Write ascii char if valid */
 	if(value >= 32 && value <= 126)
-		fprintf(stream, "\"%c\"n", (char)value);
+		fprintf(stream, "\"%c\"          \n", (char)value);
 	else
-		fprintf(stream, "\n");
+		fprintf(stream, "              \n");
 }
 
-int monitorVirtualMachine(int breakpoint, VirtualMachine *vm)
+int monitorVirtualMachine(VirtualMachine *vm)
 {
 	int  state;
-	int count = 0;
+	system("clear");
 
-	fprintf(stderr, "breakpoint placed at %d instructions\n", breakpoint);
 	do
 	{
-		fprintf(stderr, "Instruction %d\n", count);
-		if(count++ == breakpoint)
-		{
-			storeVMState("vmstate.bin", vm);
-			fprintf(stderr, "Breakpoint detected, waiting for input\n");
-			fflush(stdin);
-			getchar();
-			fflush(stdin);
-			fprintf(stderr, "resuming\n");
-			loadVMState("vmstate.bin", vm);
-		}
-		vmmonitorWriteVMInfo(stderr, vm);
+		SET_CURSOR_POS(stdout,0,0);
+		vmmonitorWriteVMInfo(stdout, vm);
+		vmmonitorWriteVMOutputstream(stdout, vm);
 		state = executeStep(vm);
 	} while(state == VM_STATE_RUNNING);
 

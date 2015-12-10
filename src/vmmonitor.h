@@ -8,6 +8,7 @@
 #define VMMONITOR_H
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "virtualmachine.h"
 
@@ -17,6 +18,13 @@
  * @param vm The virtual machine.
  */
 void vmmonitorWriteVMInfo(FILE *stream, VirtualMachine *vm);
+
+/**
+ * @brief Writes the last lines of the virtual machine's outputstream to a given stream.
+ * @param stream The stream to write to.
+ * @param mvm The virtual machine.
+ */
+void vmmonitorWriteVMOutputstream(FILE *stream, VirtualMachine *vm);
 
 /**
  * @brief Writes a line to represent te value of a memory element
@@ -31,6 +39,6 @@ void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm
  * @param vm The virtual machine.
  * @return the return value of the virtual machine
  */
-int monitorVirtualMachine(int breakpoint, VirtualMachine *vm);
+int monitorVirtualMachine(VirtualMachine *vm);
 
 #endif
