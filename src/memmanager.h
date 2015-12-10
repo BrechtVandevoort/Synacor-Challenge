@@ -18,4 +18,28 @@
  */
 int loadMemory(char *filename, VirtualMachine *vm);
 
+/**
+ * @brief Stores the date of the given vm  into the given file.
+ * @param filename Name of the file to store into.
+ * @param vm The virtual machine to store data from.
+ * @return The number of bytes stored, or -1 if failed.
+ */
+int storeMemory(char *filename, VirtualMachine *vm);
+
+/**
+ * @brief Stores the current state of the vm into the given file.
+ * @param filename The name of the file.
+ * @param vm The virtual machine
+ * @return 0 success, -1 if failed.
+ */
+int storeVMState(char *filename, VirtualMachine *vm);
+
+/**
+ * @brief Loads the current state of the vm from the given file.
+ * @param filename The name of the file.
+ * @param vm The virtual machine
+ * @return 0 success, -1 if failed.
+ */
+int loadVMState(char *filename, VirtualMachine *vm);
+
 #endif

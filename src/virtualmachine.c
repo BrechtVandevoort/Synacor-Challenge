@@ -11,16 +11,6 @@
 #include <string.h>
 
 /**
- * @brief Macro for converting a register address to a 0-based index number.
- */ 
-#define REGISTER_INDEX(r) (VM_REGISTER_ADDRESS_MASK & (r))
-
-/**
- * @brief Macro for checking if the given register address r is valid.
- */
-#define IS_VALID_REGISTER(r) ((VM_REGISTER_MASK & (r)) && REGISTER_INDEX(r) < VM_REGISTER_COUNT)
-
-/**
  * @brief Macro for converting a given value v into a valid value. 
  * result = v % 32768.
  */

@@ -1,4 +1,5 @@
-#bin, input, out and doc folder
+#run script, bin, input, out and doc folder
+run.sh
 /bin/*
 /input/*
 /out/*

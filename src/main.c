@@ -5,13 +5,16 @@
  * @brief Main function.
  */
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "virtualmachine.h"
+#include "vmmonitor.h"
 #include "memmanager.h"
 
 int main(int argc, char *argv[]) {
 	VirtualMachine vm;
 	int state;
+	int breakpoint = -1;
 	char *inputstreamFile = NULL;
 
 	if(argc < 2)
@@ -25,13 +28,19 @@ int main(int argc, char *argv[]) {
 		inputstreamFile = argv[2];
 	}
 
+	if(argc >= 4)
+	{
+		breakpoint = atoi(argv[3]);
+	}
+
 	fprintf(stderr, "running...\n");
 	
 	initVirtualMachine(inputstreamFile, &vm);
 	
 	loadMemory(argv[1], &vm);
 	
-	state = runVirtualMachine(&vm);
+	/* state = runVirtualMachine(&vm); */
+	state = monitorVirtualMachine(breakpoint, &vm);
 
 	fprintf(stderr, "VM ended with state %d\n", state);
 

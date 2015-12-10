@@ -28,6 +28,16 @@
 #define VM_STATE_ERROR 2
 
 /**
+ * @brief Macro for checking if the given register address r is valid.
+ */
+#define IS_VALID_REGISTER(r) ((VM_REGISTER_MASK & (r)) && REGISTER_INDEX(r) < VM_REGISTER_COUNT)
+
+/**
+ * @brief Macro for converting a register address to a 0-based index number.
+ */ 
+#define REGISTER_INDEX(r) (VM_REGISTER_ADDRESS_MASK & (r))
+
+/**
  * @brief Represents a virtual machine
  */
 typedef struct
@@ -35,7 +45,7 @@ typedef struct
 	uint16_t memory[VM_MEM_ELEM_COUNT];
 	uint16_t registers[VM_REGISTER_COUNT];
 	Stack *stack;
-	int instructionPointer;
+	uint16_t instructionPointer;
 	Inputstream *inputstream;
 } VirtualMachine;
 

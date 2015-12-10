@@ -4,9 +4,10 @@
  *
  * @brief Definition of the different opcodes.
  */
-
 #ifndef OPCODES_H
 #define OPCODES_H
+
+#include <stdint.h>
 
 #define OP_HALT	0
 #define OP_SET 1
@@ -39,6 +40,16 @@
  */
 extern int opcodeParamCount[];
 
+/**
+ * @brief Lookup table for the name of each opcode
+ */
+extern char *opcodeName[];
 
+/**
+ * @brief Returns a pointer to the name of the given opcode
+ * @param opcode The opcode.
+ * @return A pointer to the name of the given opcode.
+ */
+char *opcodeGetName(uint16_t opcode);
 
 #endif

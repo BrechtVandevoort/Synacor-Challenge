@@ -31,3 +31,38 @@ int opcodeParamCount[] =
 	1, /* OP_IN */
 	0  /* OP_NOOP */
 };
+
+char *opcodeNames[] = 
+{
+	"halt",
+	"set",
+	"push",
+	"pop",
+	"eq",
+	"gt",
+	"jmp",
+	"jt",
+	"jf",
+	"add",
+	"mult",
+	"mod",
+	"and",
+	"or",
+	"not",
+	"rmem",
+	"wmem",
+	"call",
+	"ret",
+	"out",
+	"in",
+	"noop",
+	"INVALID"
+};
+
+char* opcodeGetName(uint16_t opcode)
+{
+	if(opcode < OPCODE_NUM_OPS)
+		return opcodeNames[opcode];
+	else
+		return opcodeNames[OPCODE_NUM_OPS];
+}
