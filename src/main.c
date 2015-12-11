@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 	{
 		initVirtualMachine(inputstreamFile, NULL, &vm);
 		loadMemory(argv[1], &vm);
-		state = monitorVirtualMachine(&vm);
+		state = vmmonitorStart(&vm);
 	}
 	else
 	{

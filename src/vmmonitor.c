@@ -94,21 +94,44 @@ void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm
 		fprintf(stream, "              \n");
 }
 
-int monitorVirtualMachine(VirtualMachine *vm)
+void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm)
 {
-	int  state;
+	if(showVMInfo)
+	{
+		SET_CURSOR_POS(stdout,0,0);
+		vmmonitorWriteVMInfo(stdout, vm);
+	}
+	if(showOutput)
+	{
+		SET_CURSOR_POS(stdout,0,VMMONITOR_VM_STATE_LINES);
+		vmmonitorWriteVMOutputstream(stdout, vm);
+	}
+}
+
+int vmmonitorRunSteps(int numSteps, VirtualMachine *vm)
+{
+	int  state = VM_STATE_RUNNING;
+	int count = 0;
+
+	while (state == VM_STATE_RUNNING && count < numSteps)
+	{
+		state = executeStep(vm);
+		count++;
+	}
+
+	return state;
+}
+
+int vmmonitorStart(VirtualMachine *vm)
+{
+	int state = VM_STATE_RUNNING;
+
 	system("clear");
 
-	do
+	while(state == VM_STATE_RUNNING)
 	{
-		do
-		{
-			SET_CURSOR_POS(stdout,0,0);
-			vmmonitorWriteVMInfo(stdout, vm);
-			SET_CURSOR_POS(stdout,0,VMMONITOR_VM_STATE_LINES);
-			vmmonitorWriteVMOutputstream(stdout, vm);
-			state = executeStep(vm);
-		} while(state == VM_STATE_RUNNING);
+		state = vmmonitorRunSteps(10, vm);
+		vmmonitorWriteMonitor(1, 1, vm);
 		
 		/* refill inputstream buffer */
 		if(state == VM_STATE_WAITING_FOR_INPUT)
@@ -116,7 +139,7 @@ int monitorVirtualMachine(VirtualMachine *vm)
 			inputstreamWriteChar(getchar(), vm->inputstream);
 			state = VM_STATE_RUNNING;
 		}
-	} while(state == VM_STATE_RUNNING);
-
+	}
+	
 	return state;
 }
