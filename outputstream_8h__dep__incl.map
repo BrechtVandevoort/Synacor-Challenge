@@ -1,0 +1,10 @@
+<map id="outputstream.h" name="outputstream.h">
+<area shape="rect" id="node2" href="$virtualmachine_8h.html" title="Definition of the virtual machine. " alt="" coords="84,80,201,107"/>
+<area shape="rect" id="node9" href="$outputstream_8c.html" title="Implementation of the outputstream for the virtual machine. " alt="" coords="225,80,335,107"/>
+<area shape="rect" id="node3" href="$main_8c.html" title="Main function. " alt="" coords="5,229,67,256"/>
+<area shape="rect" id="node4" href="$vmmonitor_8h.html" title="Definition of the vm monitor for monitoring the execution of a vm. " alt="" coords="31,155,126,181"/>
+<area shape="rect" id="node6" href="$memmanager_8h.html" title="Definition of the memory manager for loading the memory of the virtual machine from file..." alt="" coords="151,155,263,181"/>
+<area shape="rect" id="node8" href="$virtualmachine_8c.html" title="Implementation of the virtual machine. " alt="" coords="287,155,404,181"/>
+<area shape="rect" id="node5" href="$vmmonitor_8c.html" title="Implementation of the vm monitor for monitoring the execution of a vm. " alt="" coords="91,229,186,256"/>
+<area shape="rect" id="node7" href="$memmanager_8c.html" title="Implementation of the memory manager for loading the memory of the virtual machine from file..." alt="" coords="211,229,323,256"/>
+</map>

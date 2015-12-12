@@ -1,0 +1,5 @@
+<map id="VirtualMachine" name="VirtualMachine">
+<area shape="rect" id="node2" href="$structOutputstream.html" title="Outputstream" alt="" coords="5,5,107,32"/>
+<area shape="rect" id="node3" href="$structStack.html" title="Representation of the stack. " alt="" coords="140,5,196,32"/>
+<area shape="rect" id="node4" href="$structInputstream.html" title="Inputstream" alt="" coords="220,5,311,32"/>
+</map>

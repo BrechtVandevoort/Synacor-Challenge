@@ -1,0 +1,7 @@
+<map id="virtualmachine.c" name="virtualmachine.c">
+<area shape="rect" id="node2" href="$virtualmachine_8h.html" title="Definition of the virtual machine. " alt="" coords="159,80,277,107"/>
+<area shape="rect" id="node4" href="$opcodes_8h.html" title="Definition of the different opcodes. " alt="" coords="23,155,106,181"/>
+<area shape="rect" id="node5" href="$stack_8h.html" title="Definition of the stack. " alt="" coords="131,155,196,181"/>
+<area shape="rect" id="node6" href="$inputstream_8h.html" title="Definition of the input stream for the virtual machine. " alt="" coords="221,155,322,181"/>
+<area shape="rect" id="node8" href="$outputstream_8h.html" title="Definition of the outputstream for the virtual machine. " alt="" coords="346,155,455,181"/>
+</map>
