@@ -6,9 +6,11 @@
  */
 #include "outputstream.h"
 
+#include <string.h>
 
 void initOutputstream(FILE *stream, Outputstream *outputstream)
 {
+	memset(outputstream->buffer, 0, OUTPUTSTREAM_BUFFER_SIZE * sizeof(char));
 	outputstream->bufferSize = 0;
 	outputstream->stream = stream;
 }

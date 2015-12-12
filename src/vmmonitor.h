@@ -58,10 +58,11 @@ void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm);
  * This function runs the vm until a given number of opcodes are executed
  * or until the vm changes it's state.
  * @param numSteps The number of opcodes the vm needs to execute
+ * @param breakpoint An optional breakpoint. Set to -1 if not used.
  * @param vm The virtual machine.
  * @return the return value of the virtual machine
  */
-int vmmonitorRunSteps(int numSteps, FILE *opStream, VirtualMachine *vm);
+int vmmonitorRunSteps(int numSteps, int breakpoint, FILE *opStream, VirtualMachine *vm);
 
 /**
  * @brief Starts a monitored run of the virtual machine
@@ -72,17 +73,24 @@ int vmmonitorStart(VirtualMachine *vm);
 
 /**
  * Reads and processes input.
- * @param vm The virtual machine.
  * @param writeOperations Pointer to the current flag for writing executed
  * operations to file. This function can toggle this flag.
+ * @param breakpoint Pointer to the breakpoint value. This function can change this value.
+ * @param vm The virtual machine.
  * @return The number of steps the vm should execute.
  */
-int vmmonitorReadInput(int *writeOperations, VirtualMachine *vm);
+int vmmonitorReadInput(int *writeOperations, int *breakpoint, VirtualMachine *vm);
 
 /**
  * Dumps the memory into file in a readable assembler format.
  * @param vm The virtual machine.
  */
 void vmmonitorDumpMemory(VirtualMachine *vm);
+
+/**
+ * Dumps the output stream into file.
+ * @param vm The virtual machine.
+ */
+void vmmonitorDumpOutput(VirtualMachine *vm);
 
 #endif

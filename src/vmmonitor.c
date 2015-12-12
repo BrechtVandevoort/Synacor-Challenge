@@ -159,12 +159,12 @@ void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm)
 	}
 }
 
-int vmmonitorRunSteps(int numSteps, FILE *opStream, VirtualMachine *vm)
+int vmmonitorRunSteps(int numSteps, int breakpoint, FILE *opStream, VirtualMachine *vm)
 {
 	int  state = VM_STATE_RUNNING;
 	int count = 0;
 
-	while (state == VM_STATE_RUNNING && count < numSteps)
+	while (state == VM_STATE_RUNNING && count < numSteps && vm->instructionPointer != breakpoint)
 	{
 		if(opStream)
 			vmmonitorWriteOperation(opStream, vm->instructionPointer, vm);
@@ -180,6 +180,7 @@ int vmmonitorStart(VirtualMachine *vm)
 	int state = VM_STATE_RUNNING;
 	int steps;
 	int writeOperations = 0;
+	int breakpoint = -1;
 	FILE *f;
 
 	f = fopen("vmrun.out", "w");
@@ -190,11 +191,11 @@ int vmmonitorStart(VirtualMachine *vm)
 	do
 	{
 		vmmonitorWriteMonitor(1,1,vm);
-		steps = vmmonitorReadInput(&writeOperations, vm);
+		steps = vmmonitorReadInput(&writeOperations, &breakpoint, vm);
 		if(writeOperations)
-			state = vmmonitorRunSteps(steps, f, vm);
+			state = vmmonitorRunSteps(steps, breakpoint, f, vm);
 		else
-			state = vmmonitorRunSteps(steps, NULL, vm);
+			state = vmmonitorRunSteps(steps, breakpoint, NULL, vm);
 	} while(state == VM_STATE_RUNNING || state == VM_STATE_WAITING_FOR_INPUT);
 
 	fclose(f);
@@ -202,7 +203,7 @@ int vmmonitorStart(VirtualMachine *vm)
 	return state;
 }
 
-int vmmonitorReadInput(int *writeOperations, VirtualMachine *vm)
+int vmmonitorReadInput(int *writeOperations, int *breakpoint, VirtualMachine *vm)
 {
 	int c;
 	int numSteps = 0;
@@ -257,6 +258,14 @@ int vmmonitorReadInput(int *writeOperations, VirtualMachine *vm)
 	else if(c == 'm')
 		vmmonitorDumpMemory(vm);
 
+	/* dump output to file */
+	else if(c == 'o')
+		vmmonitorDumpOutput(vm);
+
+	/* Set breakpoint */
+	else if(c == 'b')
+		scanf("%d", breakpoint);
+
 	/* Flush input */
 	while (c != '\n' && c != EOF) c = getchar();
 
@@ -281,5 +290,14 @@ void vmmonitorDumpMemory(VirtualMachine *vm)
 		++i;
 	}
 
+	fclose(f);
+}
+
+void vmmonitorDumpOutput(VirtualMachine *vm)
+{
+	FILE *f;
+
+	f = fopen("outputdump.out", "w");
+	fputs(vm->outputstream->buffer, f);
 	fclose(f);
 }
