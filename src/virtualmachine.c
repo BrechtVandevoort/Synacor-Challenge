@@ -67,6 +67,14 @@ int executeStep(VirtualMachine *vm)
 	
 	vm->instructionCount++;
 
+	/* Hardcoded fix for register 8 teleporter */
+	if(vm->instructionPointer == 6027)
+	{
+		fprintf(stderr, "Call on address %d\n", 6027);
+		vm->registers[0] = 6;
+		vm->instructionPointer = 6034;
+	}
+
 	opcode = nextMemoryElement(vm);
 	loadParams(params, opcode, vm);
 
@@ -180,6 +188,12 @@ int executeStep(VirtualMachine *vm)
 			break;
 		case OP_IN:
 			value1 = inputsreamGetChar(vm->inputstream);
+			/* Hardcoded fix for register 8 */
+			if(value1 == ':')
+				vm->registers[7] = 25734;
+			else if(value1 == ';')
+				vm->registers[7] = 0;
+
 			if(value1 == 0)
 			{
 				state = VM_STATE_WAITING_FOR_INPUT;
@@ -208,7 +222,7 @@ int executeStep(VirtualMachine *vm)
 
 int runVirtualMachine(VirtualMachine *vm)
 {
-	int  state;
+	int  state, c;
 
 	do
 	{
@@ -220,7 +234,8 @@ int runVirtualMachine(VirtualMachine *vm)
 		/* refill inputstream buffer */
 		if(state == VM_STATE_WAITING_FOR_INPUT)
 		{
-			inputstreamWriteChar(getchar(), vm->inputstream);
+			c = getchar();
+			inputstreamWriteChar(c, vm->inputstream);
 			state = VM_STATE_RUNNING;
 		}
 	} while(state == VM_STATE_RUNNING);

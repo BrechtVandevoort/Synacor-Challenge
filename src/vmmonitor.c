@@ -25,7 +25,7 @@ void vmmonitorWriteVMInfo(FILE *stream, VirtualMachine *vm)
 
 	/* Print memory near the current position of the instruction pointer */
 	fprintf(stream, "NEAR MEMORY INFO:\n");
-	for(i = vm->instructionPointer-5; i < vm->instructionPointer + 16; ++i)
+	for(i = vm->instructionPointer-2; i < vm->instructionPointer + 9; ++i)
 		vmmonitorWriteMemoryLine(stream, i, vm);
 
 	/* Print horizontal line */
