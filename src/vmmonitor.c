@@ -25,7 +25,7 @@ void vmmonitorWriteVMInfo(FILE *stream, VirtualMachine *vm)
 
 	/* Print memory near the current position of the instruction pointer */
 	fprintf(stream, "NEAR MEMORY INFO:\n");
-	for(i = vm->instructionPointer-5; i < vm->instructionPointer + 10; ++i)
+	for(i = vm->instructionPointer-5; i < vm->instructionPointer + 16; ++i)
 		vmmonitorWriteMemoryLine(stream, i, vm);
 
 	/* Print horizontal line */
@@ -94,6 +94,57 @@ void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm
 		fprintf(stream, "              \n");
 }
 
+void vmmonitorWriteOperation(FILE *stream, uint16_t address, VirtualMachine *vm)
+{
+	int i;
+	uint16_t opcode, value;
+
+	if(address < 0 || address >= VM_MEM_ELEM_COUNT)
+		return;
+
+	/* Write address */
+	fprintf(stream, "[%5d] ", address);
+	
+	opcode = vm->memory[address];
+	if(opcode < OPCODE_NUM_OPS)
+	{
+		/* Write opcode */
+		fprintf(stream, "%4s ", opcodeGetName(opcode));
+		/* Write params */
+		for(i = 1; i <= OPCODE_MAX_PARAMS; ++i)
+		{
+			if(i <= opcodeParamCount[opcode])
+			{
+				value = vm->memory[address + i];
+				if(IS_VALID_REGISTER(value))
+					fprintf(stream, "R%d       ", REGISTER_INDEX(value));
+				else
+				{
+					if(value >= 32 && value <= 126)
+						fprintf(stream, "%5d(%c) ", value, (char) value);
+					else
+						fprintf(stream, "%5d    ", value);
+				}
+			}
+			else
+			{
+				fprintf(stream, "         ");
+			}
+		}
+		fprintf(stream, "\t");
+		/* Write registers */
+		for(i = 0; i < VM_REGISTER_COUNT; ++i)
+			fprintf(stream, "<R%d:%5d> ", i, vm->registers[i]);
+	}
+	else
+	{
+		/* Write invalid opcode as data */
+		fprintf(stream, "DATA: %d", opcode);
+	}
+
+	fprintf(stream, "\n");
+}
+
 void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm)
 {
 	if(showVMInfo)
@@ -108,13 +159,15 @@ void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm)
 	}
 }
 
-int vmmonitorRunSteps(int numSteps, VirtualMachine *vm)
+int vmmonitorRunSteps(int numSteps, FILE *opStream, VirtualMachine *vm)
 {
 	int  state = VM_STATE_RUNNING;
 	int count = 0;
 
 	while (state == VM_STATE_RUNNING && count < numSteps)
 	{
+		if(opStream)
+			vmmonitorWriteOperation(opStream, vm->instructionPointer, vm);
 		state = executeStep(vm);
 		count++;
 	}
@@ -125,21 +178,108 @@ int vmmonitorRunSteps(int numSteps, VirtualMachine *vm)
 int vmmonitorStart(VirtualMachine *vm)
 {
 	int state = VM_STATE_RUNNING;
+	int steps;
+	int writeOperations = 0;
+	FILE *f;
 
+	f = fopen("vmrun.out", "w");
+
+	/* Clear console before running */
 	system("clear");
 
-	while(state == VM_STATE_RUNNING)
+	do
 	{
-		state = vmmonitorRunSteps(10, vm);
-		vmmonitorWriteMonitor(1, 1, vm);
-		
-		/* refill inputstream buffer */
-		if(state == VM_STATE_WAITING_FOR_INPUT)
-		{
-			inputstreamWriteChar(getchar(), vm->inputstream);
-			state = VM_STATE_RUNNING;
-		}
-	}
-	
+		vmmonitorWriteMonitor(1,1,vm);
+		steps = vmmonitorReadInput(&writeOperations, vm);
+		if(writeOperations)
+			state = vmmonitorRunSteps(steps, f, vm);
+		else
+			state = vmmonitorRunSteps(steps, NULL, vm);
+	} while(state == VM_STATE_RUNNING || state == VM_STATE_WAITING_FOR_INPUT);
+
+	fclose(f);
+
 	return state;
+}
+
+int vmmonitorReadInput(int *writeOperations, VirtualMachine *vm)
+{
+	int c;
+	int numSteps = 0;
+	int reg, address, value;
+
+	/* Clear part of console for input */
+	SET_CURSOR_POS(stdout, 0, VMMONITOR_VM_STATE_LINES + VMMONITOR_VM_OUTPUT_LINES);
+	fprintf(stdout, "                                                           \n");
+	SET_CURSOR_POS(stdout, 0, VMMONITOR_VM_STATE_LINES + VMMONITOR_VM_OUTPUT_LINES);
+
+	fprintf(stdout, "INPUT: ");
+	c = getchar();
+
+	/* Next instruction */
+	if (c == '\n')
+		numSteps = 1;
+	
+	/* Write to input stream */
+	else if(c == '>')
+	{
+		do
+		{
+			c = getchar();
+			inputstreamWriteChar(c, vm->inputstream);
+		} while(c != '\n');
+	}
+
+	/* Run multiple steps */
+	else if(c == ':')
+		scanf("%d", &numSteps);
+
+	/* Jump to address */
+	else if(c == 'j')
+	{
+		if(scanf("%d", &address))
+			vm->instructionPointer = address;
+	}
+
+	/* Set register */
+	else if(c == 'r')
+	{
+		if(scanf("%d %d", &reg, &value))
+			vm->registers[reg] = value;
+	}
+
+	/* Change writing operations to file */
+	else if(c == 'w')
+		*writeOperations = 1 - *writeOperations;
+	
+
+	/* Dump merory */
+	else if(c == 'm')
+		vmmonitorDumpMemory(vm);
+
+	/* Flush input */
+	while (c != '\n' && c != EOF) c = getchar();
+
+	return numSteps;
+}
+
+
+void vmmonitorDumpMemory(VirtualMachine *vm)
+{
+	int i = 0;
+	int opcode;
+	FILE *f;
+
+	f = fopen("memdump.out", "w");
+
+	while(i < VM_MEM_ELEM_COUNT)
+	{
+		opcode = vm->memory[i];
+		vmmonitorWriteOperation(f, i, vm);
+		if(opcode < OPCODE_NUM_OPS)
+			i += opcodeParamCount[opcode];
+		++i;
+	}
+
+	fclose(f);
 }

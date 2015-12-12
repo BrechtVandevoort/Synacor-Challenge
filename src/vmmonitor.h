@@ -12,8 +12,8 @@
 
 #include "virtualmachine.h"
 
-#define VMMONITOR_VM_STATE_LINES 22
-#define VMMONITOR_VM_OUTPUT_LINES 10
+#define VMMONITOR_VM_STATE_LINES 28
+#define VMMONITOR_VM_OUTPUT_LINES 15
 
 /**
  * @brief Writes the state of the virtual machine to a given stream.
@@ -38,6 +38,14 @@ void vmmonitorWriteVMOutputstream(FILE *stream, VirtualMachine *vm);
 void vmmonitorWriteMemoryLine(FILE *stream, uint16_t address, VirtualMachine *vm);
 
 /**
+ * @briefs Writes a line to represent the operation on the given address
+ * @param stream The stream to write to.
+ * @param address The address of the operation
+ * @param vm The virtual machine.
+ */
+void vmmonitorWriteOperation(FILE *stream, uint16_t address, VirtualMachine *vm);
+
+/**
  * @brief Writes the monitor on the screen
  * @param showVMInfo If nonzero, the VM info will be written.
  * @param showOutput If nonzero, the outputsstream will be written.
@@ -53,7 +61,7 @@ void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm);
  * @param vm The virtual machine.
  * @return the return value of the virtual machine
  */
-int vmmonitorRunSteps(int numSteps, VirtualMachine *vm);
+int vmmonitorRunSteps(int numSteps, FILE *opStream, VirtualMachine *vm);
 
 /**
  * @brief Starts a monitored run of the virtual machine
@@ -61,5 +69,20 @@ int vmmonitorRunSteps(int numSteps, VirtualMachine *vm);
  * @return the return value of the virtual machine
  */
 int vmmonitorStart(VirtualMachine *vm);
+
+/**
+ * Reads and processes input.
+ * @param vm The virtual machine.
+ * @param writeOperations Pointer to the current flag for writing executed
+ * operations to file. This function can toggle this flag.
+ * @return The number of steps the vm should execute.
+ */
+int vmmonitorReadInput(int *writeOperations, VirtualMachine *vm);
+
+/**
+ * Dumps the memory into file in a readable assembler format.
+ * @param vm The virtual machine.
+ */
+void vmmonitorDumpMemory(VirtualMachine *vm);
 
 #endif
