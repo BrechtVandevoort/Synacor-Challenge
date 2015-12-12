@@ -5,7 +5,6 @@ run.sh
 /out/*
 /doc/doxygen*
 /doc/latex/*
-/doc/html/*
 
 # Object files
 *.o

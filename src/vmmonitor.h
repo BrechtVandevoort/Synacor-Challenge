@@ -25,7 +25,7 @@ void vmmonitorWriteVMInfo(FILE *stream, VirtualMachine *vm);
 /**
  * @brief Writes the last lines of the virtual machine's outputstream to a given stream.
  * @param stream The stream to write to.
- * @param mvm The virtual machine.
+ * @param vm The virtual machine.
  */
 void vmmonitorWriteVMOutputstream(FILE *stream, VirtualMachine *vm);
 
@@ -59,6 +59,7 @@ void vmmonitorWriteMonitor(int showVMInfo, int showOutput, VirtualMachine *vm);
  * or until the vm changes it's state.
  * @param numSteps The number of opcodes the vm needs to execute
  * @param breakpoint An optional breakpoint. Set to -1 if not used.
+ * @param opStream Pointer to a stream for writing the current operation. Set to NULL if not used.
  * @param vm The virtual machine.
  * @return the return value of the virtual machine
  */

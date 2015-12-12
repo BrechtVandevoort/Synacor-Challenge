@@ -1,0 +1,8 @@
+<map id="memmanager.c" name="memmanager.c">
+<area shape="rect" id="node2" href="$memmanager_8h.html" title="Definition of the memory manager for loading the memory of the virtual machine from file..." alt="" coords="226,80,338,107"/>
+<area shape="rect" id="node3" href="$virtualmachine_8h.html" title="Definition of the virtual machine. " alt="" coords="158,155,275,181"/>
+<area shape="rect" id="node5" href="$opcodes_8h.html" title="Definition of the different opcodes. " alt="" coords="23,229,106,256"/>
+<area shape="rect" id="node6" href="$stack_8h.html" title="Definition of the stack. " alt="" coords="131,229,196,256"/>
+<area shape="rect" id="node7" href="$inputstream_8h.html" title="Definition of the input stream for the virtual machine. " alt="" coords="221,229,322,256"/>
+<area shape="rect" id="node9" href="$outputstream_8h.html" title="Definition of the outputstream for the virtual machine. " alt="" coords="346,229,455,256"/>
+</map>

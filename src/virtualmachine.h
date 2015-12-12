@@ -92,6 +92,7 @@ int runVirtualMachine(VirtualMachine *vm);
  * the value of this register is returned.
  * If not, the value itself is returned.
  * @param memElem The memory element to translate to a value.
+ * @param vm The virtual machine.
  * @return The translated value.
  */
 uint16_t getValue(uint16_t memElem, VirtualMachine *vm);
